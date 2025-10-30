@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { analyzeImage } from './api'
+import { speak, listVoices } from './tts'
 
 export default function App() {
   const videoRef = useRef(null)
@@ -8,6 +9,8 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
+  const [voices, setVoices] = useState([])
+  const [voiceName, setVoiceName] = useState('')
 
   useEffect(() => {
     (async () => {
@@ -20,6 +23,9 @@ export default function App() {
         setError('Camera permission denied or unavailable.')
       }
     })()
+
+    // load TTS voices
+    listVoices().then(v => setVoices(v))
   }, [])
 
   const capture = async () => {
@@ -44,6 +50,12 @@ export default function App() {
     }
   }
 
+  const onSpeak = () => {
+    if (result?.poem) {
+      speak(result.poem, { voiceName, rate: 1, pitch: 1 })
+    }
+  }
+
   return (
     <div style={{ fontFamily: 'system-ui, sans-serif', maxWidth: 720, margin: '40px auto', padding: 16 }}>
       <h1>Emotion → Poem</h1>
@@ -52,11 +64,21 @@ export default function App() {
       <div style={{ display: 'grid', gap: 16, gridTemplateColumns: '1fr' }}>
         <video ref={videoRef} playsInline muted style={{ width: '100%', borderRadius: 12, background: '#000' }} />
         <canvas ref={canvasRef} style={{ display: 'none' }} />
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <button onClick={capture} disabled={!streamOk || loading}>
             {loading ? 'Analyzing…' : 'Capture & Generate Poem'}
           </button>
           <button onClick={() => setResult(null)} disabled={loading}>Clear</button>
+
+          {/* Voice selector (optional) */}
+          <select value={voiceName} onChange={e => setVoiceName(e.target.value)}>
+            <option value="">Default voice</option>
+            {voices.map(v => (
+              <option key={v.name} value={v.name}>{v.name} ({v.lang})</option>
+            ))}
+          </select>
+
+          <button onClick={onSpeak} disabled={!result?.poem}>🔊 Speak</button>
         </div>
 
         {error && <div style={{ color: 'crimson' }}>{error}</div>}
@@ -68,11 +90,6 @@ export default function App() {
           </div>
         )}
       </div>
-
-      <details style={{ marginTop: 24 }}>
-        <summary>Privacy</summary>
-        <p>Images are sent to the backend only for real-time inference and not stored. Disable your camera at any time.</p>
-      </details>
     </div>
   )
 }
