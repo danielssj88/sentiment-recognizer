@@ -1,7 +1,9 @@
+const API_BASE = '/api'; // served via Nginx proxy
+
 export async function analyzeImage(file) {
   const form = new FormData()
   form.append('image', file)
-  const res = await fetch('http://localhost:8000/analyze', {
+  const res = await fetch(`${API_BASE}/analyze`, {
     method: 'POST',
     body: form
   })
