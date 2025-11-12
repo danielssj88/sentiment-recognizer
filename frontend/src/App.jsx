@@ -2,6 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import { analyzeImage } from './api'
 import { speak, listVoices } from './tts'
 
+const backgroundImages = {
+  happy: '/backgrounds/happy.png',
+  sad: '/backgrounds/sad.png',
+  angry: '/backgrounds/angry.png',
+  surprised: '/backgrounds/surprised.png',
+  neutral: '/backgrounds/neutral.png'
+};
+
 export default function App() {
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
@@ -43,6 +51,7 @@ export default function App() {
       const file = new File([blob], 'frame.jpg', { type: 'image/jpeg' })
       const data = await analyzeImage(file)
       setResult(data)
+      document.body.style.backgroundImage = `url(${backgroundImages['happy']})`
     } catch (e) {
       setError(e.message)
     } finally {
@@ -62,7 +71,11 @@ export default function App() {
       <p>With your consent, we analyze the current facial expression and craft a short poem to match.</p>
 
       <div style={{ display: 'grid', gap: 16, gridTemplateColumns: '1fr' }}>
-        <video ref={videoRef} playsInline muted style={{ width: '100%', borderRadius: 12, background: '#000' }} />
+        <video ref={videoRef} playsInline muted style={{
+          width: '100%',
+          borderRadius: 12,
+          background: '#000',
+          opacity: result ? 0.8 : 1.0 }} />
         <canvas ref={canvasRef} style={{ display: 'none' }} />
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <button onClick={capture} disabled={!streamOk || loading}>
