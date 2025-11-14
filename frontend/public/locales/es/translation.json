@@ -1,0 +1,24 @@
+{
+  "title": "Emoción → Poema",
+  "tagline": "Con tu consentimiento, analizamos tu expresión facial y creamos un poema corto acorde.",
+  "capture": "Capturar y generar poema",
+  "clear": "Limpiar",
+  "speak": "Hablar",
+  "voice": "Voz",
+  "emotion": "Emoción",
+  "privacyTitle": "Privacidad",
+  "privacyBody": "Las imágenes se envían al backend solo para inferencia en tiempo real y no se almacenan. Puedes desactivar la cámara cuando quieras.",
+  "errors": {
+    "camera": "Permiso de cámara denegado o no disponible.",
+    "analysis": "Fallo en el análisis"
+  },
+  "start": {
+    "q1": "¿Quieres que te acompañe leyendo tus emociones en tiempo real, hasta que decidas apagarme?",
+    "q2": "¿O prefieres saber tu emoción solo en este momento?",
+
+    "realTimeYes": "Ok, te acompañaré hasta que decidas apagarme.",
+    "oneTimeYes": "De acuerdo, una sola lectura. Puedes consultarme de nuevo cuando lo requieras.",
+
+    "final": "De acuerdo… trataré de ser lo más empático que mi programación lo permita."
+  }
+}

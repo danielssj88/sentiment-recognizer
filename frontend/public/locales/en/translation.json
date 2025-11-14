@@ -1,0 +1,24 @@
+{
+  "title": "Emotion → Poem",
+  "tagline": "With your consent, we analyze your facial expression and craft a short poem to match.",
+  "capture": "Capture & Generate Poem",
+  "clear": "Clear",
+  "speak": "Speak",
+  "voice": "Voice",
+  "emotion": "Emotion",
+  "privacyTitle": "Privacy",
+  "privacyBody": "Images are sent to the backend only for real-time inference and are not stored. Disable your camera at any time.",
+  "errors": {
+    "camera": "Camera permission denied or unavailable.",
+    "analysis": "Analysis failed"
+  },
+  "start": {
+    "q1": "Do you want me to monitor your emotions in real time, until you turn me off?",
+    "q2": "Or do you prefer to know only how you feel currently (in the present moment)?",
+
+    "realTimeYes": "Ok, I’ll stay with you until you decide to turn me off.",
+    "oneTimeYes": "Alright, one reading only. You can ask me again whenever you require.",
+
+    "final": "Ok… I’ll try to be as empathetic as my programming allows."
+  }
+}

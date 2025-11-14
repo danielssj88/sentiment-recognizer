@@ -1,9 +1,11 @@
-const API_BASE = '/api'; // served via Nginx proxy
+const API_BASE = 'http://localhost:8000'; // '/api'; // served via Nginx proxy
 
-export async function analyzeImage(file) {
+export async function analyzeImage(file, lang = "en") {
   const form = new FormData()
-  form.append('image', file)
-  const res = await fetch(`${API_BASE}/analyze`, {
+  form.append('image', file);
+  form.append("lang", lang);
+
+  const res = await fetch(`${API_BASE}/analyze?lang=${encodeURIComponent(lang)}`, {
     method: 'POST',
     body: form
   })

@@ -1,7 +1,7 @@
 import base64
 import os
 import json
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Literal
@@ -42,13 +42,19 @@ SYSTEM_PROMPT = (
 )
 
 @app.post("/analyze", response_model=PoemResponse)
-async def analyze(image: UploadFile = File(...)):
+async def analyze(image: UploadFile = File(...), lang: str = Query("en")):
     # Read bytes and convert to data URL for the multimodal API
     img_bytes = await image.read()
     b64 = base64.b64encode(img_bytes).decode("utf-8")
     data_url = f"data:{image.content_type};base64,{b64}"
 
-    # --- replace the whole `client.responses.create(...)` block with this: ---
+    # Build a language-aware instruction
+    user_text = "Infer emotion from this image and write a short poem."
+    if lang == "es":
+        user_text = "Infiere la emoción de esta imagen y escribe un poema corto en español."
+    print(f'lang: {lang}')
+    print(f'user_text: {user_text}')
+
     result = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
@@ -56,7 +62,7 @@ async def analyze(image: UploadFile = File(...)):
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": "Infer emotion from this image and write a poem."},
+                    {"type": "text", "text": user_text},
                     {"type": "image_url", "image_url": {"url": data_url}},
                 ],
             },
