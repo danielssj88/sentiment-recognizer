@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from "react-i18next";
 import { ensureLanguage } from "./i18n/i18n";
-import { analyzeImage } from './api'
+import { analyzeImage, ttsPoem } from './api'
 import { speak, listVoices } from './tts'
 import LangSelector from "./components/LangSelector";
 import "./App.css";
@@ -33,6 +33,7 @@ export default function App() {
   const [error, setError] = useState('')
   const [voices, setVoices] = useState([])
   const [voiceName, setVoiceName] = useState('')
+  const [ttsLoading, setTtsLoading] = useState(false);
 
   // 1) Camera / voices / initial language
   useEffect(() => {
@@ -104,9 +105,24 @@ export default function App() {
     }
   }
 
-  const onSpeak = () => {
-    if (result?.poem) {
-      speak(result.poem, { voiceName, rate: 1, pitch: 1 })
+  const onSpeak = async () => {
+    if (!result?.poem || ttsLoading) return;
+
+    try {
+      setError("");
+      setTtsLoading(true);
+      // Optional: set a small "speaking" state if you want to disable button
+
+      const audioUrl = await ttsPoem(result.poem, "verse", "mp3");
+      const audio = new Audio(audioUrl);
+
+      audio.onended = () => {
+        setTtsLoading(false);
+      };
+
+      audio.play();
+    } catch (e) {
+      setError("TTS failed. Please try again.");
     }
   }
 
@@ -255,26 +271,12 @@ export default function App() {
                 </button>
 
                 <div className="camera-voice">
-                  <label className="camera-label">{t("voice")}</label>
-                  <select
-                    value={voiceName}
-                    onChange={(e) => setVoiceName(e.target.value)}
-                    className="voice-select"
-                  >
-                    <option value="">{t("voice")} (default)</option>
-                    {voices.map((v) => (
-                      <option key={v.name} value={v.name}>
-                        {v.name} ({v.lang})
-                      </option>
-                    ))}
-                  </select>
-
                   <button
-                    className="btn-speak"
+                    className={`btn-speak ${ttsLoading ? "btn-speak-loading" : ""}`}
                     onClick={onSpeak}
-                    disabled={!result?.poem}
+                    disabled={!result?.poem || ttsLoading}
                   >
-                    🔊 {t("speak")}
+                    {ttsLoading ? "🔄 " + t("loading") : "🔊 " + t("speak")}
                   </button>
                 </div>
               </div>

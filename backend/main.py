@@ -1,7 +1,9 @@
 import base64
+import io
 import os
 import json
-from fastapi import FastAPI, UploadFile, File, Query
+from fastapi import FastAPI, UploadFile, File, Query, Body
+from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Literal
@@ -52,8 +54,6 @@ async def analyze(image: UploadFile = File(...), lang: str = Query("en")):
     user_text = "Infer emotion from this image and write a short poem."
     if lang == "es":
         user_text = "Infiere la emoción de esta imagen y escribe un poema corto en español."
-    print(f'lang: {lang}')
-    print(f'user_text: {user_text}')
 
     result = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -95,6 +95,45 @@ async def analyze(image: UploadFile = File(...), lang: str = Query("en")):
     conf = float(max(0.0, min(1.0, data.get("confidence", 0.5))))
     poem = data.get("poem", "")
     return PoemResponse(emotion=emo, confidence=conf, poem=poem)
+
+@app.post("/tts")
+async def tts_endpoint(
+    text: str = Body(..., embed=True),
+    voice: str = Body("verse", embed=True),
+    response_format: str = Body("mp3", embed=True),
+):
+    """
+    Generate speech audio using OpenAI TTS (gpt-4o-mini-tts).
+    """
+    try:
+        response = client.audio.speech.create(
+            model="gpt-4o-mini-tts",
+            voice=voice,
+            input=text,
+            response_format=response_format
+        )
+
+        audio_bytes = response.read()
+
+        mime = (
+            "audio/mpeg"
+            if response_format == "mp3"
+            else "audio/wav"
+        )
+
+        return StreamingResponse(
+            io.BytesIO(audio_bytes),
+            media_type=mime,
+            headers={
+                "Content-Disposition": f'inline; filename="poem.{response_format}"'
+            },
+        )
+    except Exception as e:
+        print("TTS ERROR:", e)
+        return JSONResponse(
+            status_code=500,
+            content={"error": "TTS generation failed", "detail": str(e)},
+        )
 
 
 @app.get("/health")
